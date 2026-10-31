@@ -42,9 +42,20 @@ dentro do container pare o teste utilizando:
 
 > killall yes
 
-#### 3. Teste Limite de memória (memory.max = 100MB)
+### 3. Teste Limite de memória (memory.max = 100MB)
 
-#### 4. Inspeção Rápida no Host
+Dentro do container, execute:
+
+> awk 'BEGIN { for(i=0; i<3000000; i++) a[i]="preenchendo memoria com texto" }'
+
+Em outro terminal host:
+
+> cat /sys/fs/cgroup/meu-container/memory.current
+
+Resultado esperado:
+O swap não foi desativado, portanto o consumo mostrado não poderá ser superior a 104857600 (100MB)
+
+### 4. Inspeção Rápida no Host
 
 Enquanto o container estiver em execução, você pode conferir se o PID do container realmente foi anexado ao grupo inspecionando:
 
