@@ -14,7 +14,7 @@ sudo go run main.go run /bin/sh
 
 ## Maneiras de comprovar que o cgroup funciona
 
-#### 1. Teste de limite de processos (pids.max = 20)
+### 1. Teste de limite de processos (pids.max = 20)
 
 Dentro do container, tente criar 30 processos em segundo plano com o comando:
 
@@ -26,7 +26,7 @@ No Host: Você pode verificar a contagem atual, com o comando:
 
 > cat /sys/fs/cgroup/meu-container/pids.current
 
-#### 2. Teste Limite de CPU (cpu.max = 20%)
+### 2. Teste Limite de CPU (cpu.max = 20%)
 
 Dentro do container, execute:
 
