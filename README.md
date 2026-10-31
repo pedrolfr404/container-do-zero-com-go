@@ -19,7 +19,8 @@ sudo go run main.go run /bin/sh
 Dentro do container, tente criar 30 processos em segundo plano com o comando:
 
 > for i in $(seq 1 30); do sleep 60 & done
-> Mensagem esperada: sh: can't fork: Resource temporarily unavailable
+
+Mensagem esperada: sh: can't fork: Resource temporarily unavailable
 
 No Host: Você pode verificar a contagem atual, com o comando:
 
