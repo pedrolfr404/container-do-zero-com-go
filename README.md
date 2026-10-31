@@ -2,13 +2,15 @@
 
 Projeto Sistemas Operacionais II
 
-## Executar
+## Executar container
 
-sudo mkdir -p /opt/container/rootfs
-wget https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.3-x86_64.tar.gz
-sudo tar -xzf alpine-minirootfs-\*.tar.gz -C /opt/container/rootfs
-ls /opt/container/rootfs
-sudo go run main.go run /bin/sh
+```sudo mkdir -p /opt/container/rootfs```
+
+```wget https://dl-cdn.alpinelinux.org/alpine/v3.20/releases/x86_64/alpine-minirootfs-3.20.3-x86_64.tar.gz```
+
+```sudo tar -xzf alpine-minirootfs-\*.tar.gz -C /opt/container/rootfs```
+
+```sudo go run main.go run /bin/sh```
 
 ## Maneiras de comprovar que o ambiente está isolado
 
@@ -18,39 +20,39 @@ sudo go run main.go run /bin/sh
 
 Dentro do container, tente criar 30 processos em segundo plano com o comando:
 
-> for i in $(seq 1 30); do sleep 60 & done
+```for i in $(seq 1 30); do sleep 60 & done```
 
 Mensagem esperada: sh: can't fork: Resource temporarily unavailable
 
 No Host: Você pode verificar a contagem atual, com o comando:
 
-> cat /sys/fs/cgroup/meu-container/pids.current
+```cat /sys/fs/cgroup/meu-container/pids.current```
 
 ### 2. Teste Limite de CPU (cpu.max = 20%)
 
 Dentro do container, execute:
 
-> yes > /dev/null &
+```yes > /dev/null &```
 
 No Host execute o monitor de processos com o comando:
 
-> top
+```top```
 
 Resultado esperado: o processo yes ficará limitado a no máximo 20% de CPU e não conseguirá usar 100% do núcleo
 
 dentro do container pare o teste utilizando:
 
-> killall yes
+```killall yes```
 
 ### 3. Teste Limite de memória (memory.max = 100MB)
 
 Dentro do container, execute:
 
-> awk 'BEGIN { for(i=0; i<3000000; i++) a[i]="preenchendo memoria com texto" }'
+```awk 'BEGIN { for(i=0; i<3000000; i++) a[i]="preenchendo memoria com texto" }'```
 
 Em outro terminal host:
 
-> cat /sys/fs/cgroup/meu-container/memory.current
+```cat /sys/fs/cgroup/meu-container/memory.current```
 
 Resultado esperado:
 O swap não foi desativado, portanto o consumo mostrado não poderá ser superior a 104857600 (100MB)
@@ -61,8 +63,8 @@ Enquanto o container estiver em execução, você pode conferir se o PID do cont
 
 Verifica se o PID do processo filho está no cgroup
 
-> cat /sys/fs/cgroup/meu-container/cgroup.procs
+```cat /sys/fs/cgroup/meu-container/cgroup.procs```
 
 Uso atual de memória
 
-> cat /sys/fs/cgroup/meu-container/memory.current
+```cat /sys/fs/cgroup/meu-container/memory.current```
