@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"syscall"
+
+	"container-go/internal/network"
 )
 
 const cgroupRoot = "/sys/fs/cgroup/meu-container"
@@ -88,8 +90,14 @@ func run() {
 		},
 	}
 
+	// NOVO: pipe de sincronização. A ponta de leitura vai para o filho como fd 3.
+	syncR, syncW, err := os.Pipe()
+	must(err)
+	cmd.ExtraFiles = []*os.File{syncR}
+
 	// Inicia o processo filho para obtermos o PID no host
 	must(cmd.Start())
+	syncR.Close() // NOVO: o pai não usa a ponta de leitura
 
 	// Aplica restrições de cgroup no host usando o PID do filho
 	cleanup, err := setupCgroups(cmd.Process.Pid)
@@ -99,11 +107,24 @@ func run() {
 		defer cleanup()
 	}
 
+	// NOVO: configura a rede (veth, IPs, rota) no namespace do filho
+	must(network.Setup(cmd.Process.Pid))
+	defer network.Cleanup()
+
+	// NOVO: avisa o filho que pode continuar
+	syncW.Close()
+
 	// Aguarda o termino do container
 	must(cmd.Wait())
 }
 
 func child() {
+	// NOVO: espera o pai terminar de configurar a rede
+	syncPipe := os.NewFile(3, "sync")
+	buf := make([]byte, 1)
+	syncPipe.Read(buf) // bloqueia até o pai fechar a ponta de escrita (EOF)
+	syncPipe.Close()
+
 	fmt.Printf("[child] rodando %v (pid %d)", os.Args[2:], os.Getpid())
 
 	must(syscall.Sethostname([]byte("meu-container")))
